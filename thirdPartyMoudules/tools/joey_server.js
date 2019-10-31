@@ -73,7 +73,7 @@ function gltfPipeline(inPutPath,outPutPath,gltfName,compressionLevel,gltfTotalNu
             count++;
             let end=new Date();
             let endTime = end.getTime();
-            console.log(gltfName+" :压缩成功"+" 用时 "+(endTime-startTime)+"ms");
+            console.log(gltfName+" :压缩成功" + " 用时 "+(endTime-startTime) + "ms");
             if(count==gltfTotalNum){
                 endTime = end.getTime();
                 totalTime = endTime-firstStartTime;
