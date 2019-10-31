@@ -5,6 +5,7 @@ import Register from '@/components/login/register'
 import RegisterSuccess from '@/components/login/registerSuccess'
 import History from '@/components/operationLog/history'
 import CompressGltf from '@/components/3dtilesTools/CompressGltf'
+import Presentation from '@/components/presentation/presentation'
 import NotFound from '@/components/others/404'
 import Home from '@/components/home'
 
@@ -57,6 +58,11 @@ export default new Router({
           path: '/compressGltf',
           name: 'compressGltf',
           component: CompressGltf
+        },
+        {
+          path: '/presentation',
+          name: 'presentation',
+          component: Presentation
         },
         {
           path: '/404',
