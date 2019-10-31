@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>压缩工具</title>
+</head>
+<body>
+   <div>
+       <hr style="position: absolute;top:25%;width: 100%;">
+       <div style="position: absolute;left:40%;top:30%;">
+           输入：
+           <input id="inAbsolutePath" type="input" value=""placeholder="gltf输入文件夹绝对路径"/>
+       </div>
+       <br>
+       <div style="position: absolute;left:40%;top:35%;">
+           输出：
+           <input id="outAbsolutePath" type="input" value=""placeholder="gltf输出文件夹绝对路径"/>
+       </div>
+        <br>
+       <div style="position: absolute;left:40%;top:40%;">压缩级别：
+           <select  id="levelSelect">
+               <option value="1">1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+               <option value="4">4</option>
+               <option value="5">5</option>
+               <option value="6">6</option>
+               <option value="7">7</option>
+               <option value="8">8</option>
+               <option value="9">9</option>
+               <option value="10" selected="selected">10</option>
+           </select>
+       </div>
+       <div style="position: absolute;left:40%;top:45%;">
+           <input id="gltfCompress" type="file" multiple="multiple"/>
+       </div>
+       <div style="position: absolute;left:40%;top:50%;">
+           <button id="goCompress" onclick="goCompress()">开始压缩</button>
+           <button id="revertCompress" onclick="revertCompress()">重置面板</button>
+       </div>
+       <hr style="position: absolute;top:55%;width: 100%;">
+   </div>
+   
+   <div id="loadingGif" style="display: none;">
+       <img src="http://10.6.224.8:8080/gif/loading.gif" alt="loading..." style="position: absolute;left:50%;top:49.8%;width: 25px;">
+       <i  style="position: absolute;left:53%;top:50.2%;font-size: 5px;color:red;">正在压缩中...</i>
+   </div>
+
+   <script type="text/javascript">
+               let xhr = new XMLHttpRequest();
+               let gltfFile = document.getElementById('gltfCompress');
+               let gltfInfoArrStr = "";
+               let inPutVal = "";
+               let outPutVal = "";
+               let level = "";
+               let files = null;
+
+               gltfFile.onchange = function(){
+                   inPutVal = document.getElementById('inAbsolutePath').value;
+                   outPutVal = document.getElementById('outAbsolutePath').value;
+                   level = document.getElementById('levelSelect').value;
+                   gltfInfoArrStr = "";
+                   gltfInfoArrStr = inPutVal+","+outPutVal+","+level+",";
+                   files = this.files;
+                   for(var i = 0;i<files.length;i++){
+                       if(i<files.length-1)
+                           gltfInfoArrStr += files[i].name+",";
+                       else
+                           gltfInfoArrStr += files[i].name;
+                   }
+               }
+
+
+               xhr.onreadystatechange = function () {
+                   if( xhr.readyState==4  ){//已经接收全部响应数据
+                       if( (xhr.status>=200 && xhr.status<300) || xhr.status==304 ){
+                          // console.log( '-----请求并响应成功------' );
+                           console.log('-----'+xhr.responseText+'-----');
+                           //console.log( '-----请求并响应成功------' );
+                       }else{
+                           console.log( "请求未成功： " + xhr.status );
+                       }
+                   }
+               }
+               xhr.onready;
+
+               function goCompress() {
+                   //判断是否可以压缩
+                   if(document.getElementById('inAbsolutePath').value==""){
+                       alert("请输入：gltf输入文件夹绝对路径");
+                       return;
+                   }
+                   if(document.getElementById('outAbsolutePath').value==""){
+                       alert("请输入：gltf输出文件夹绝对路径");
+                       return;
+                   }
+                   if(document.getElementById('levelSelect').value==""){
+                       alert("请选择：压缩等级");
+                       return;
+                   }
+                   if(files==null){
+                       alert("请选择：gltf文件");
+                       return;
+                   }
+                   document.getElementById('loadingGif').style = "display:block";
+                   //启动请求，url可以是相对于执行代码的当前页面
+                   xhr.open('post','/',true)
+                   xhr.send(gltfInfoArrStr);
+               }
+
+               function revertCompress() {
+                   let el1 = document.getElementById('inAbsolutePath');
+                   let el2 = document.getElementById('outAbsolutePath');
+                   let el3 = document.getElementById('levelSelect');
+                   let el4 = document.getElementById('gltfCompress');
+                   el1.value = "";
+                   el2.value = "";
+                   el3.value = 10;
+                   el4.value = "";
+                   gltfInfoArrStr = "";
+                   inPutVal = "";
+                   outPutVal = "";
+                   level = "";
+                   files = null;
+               }
+   </script>
+</body>
+</html>
+
