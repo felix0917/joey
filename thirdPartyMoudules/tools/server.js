@@ -83,7 +83,7 @@ function gltfPipeline(inPutPath,outPutPath,gltfName,compressionLevel,gltfTotalNu
         });
 }
 server.listen(2500);
-console.log('success listen at port:3000......');
+console.log('success listen at port:2500......');
 //自动打开网页
 var c = require('child_process');
 c.exec('start http://localhost:2500/home.html');
