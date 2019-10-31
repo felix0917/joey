@@ -21,7 +21,7 @@
       <el-menu-item index="/compress-glb">压缩GLB</el-menu-item>
     </el-submenu>
 
-    <el-menu-item index="">
+    <el-menu-item index="/presentation">
       <i class="el-icon-s-platform"></i>
       <span slot="title">成果展示</span>
     </el-menu-item>
