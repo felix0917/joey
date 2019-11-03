@@ -18,8 +18,8 @@
         <span>三维工具</span>
       </template>
       <el-menu-item index="/compressGltf">压缩glTF</el-menu-item>
-      <el-menu-item index="/compress-glb">glb转glTF</el-menu-item>
-      <el-menu-item index="/compress-glb">glTF转glb</el-menu-item>
+       <el-menu-item index="/gltf2glb">glTF转glb</el-menu-item>
+      <el-menu-item index="/glb2gltf">glb转glTF</el-menu-item>
       <el-menu-item index="/compress-glb">提取glTF纹理</el-menu-item>
     </el-submenu>
 

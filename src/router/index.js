@@ -5,6 +5,8 @@ import Register from '@/components/login/register'
 import RegisterSuccess from '@/components/login/registerSuccess'
 import History from '@/components/operationLog/history'
 import CompressGltf from '@/components/3dtilesTools/CompressGltf'
+import Gltf2glb from '@/components/3dtilesTools/gltf2glb'
+import Glb2gltf from '@/components/3dtilesTools/Glb2gltf'
 import Presentation from '@/components/presentation/presentation'
 import NotFound from '@/components/others/404'
 import Home from '@/components/home'
@@ -58,6 +60,16 @@ export default new Router({
           path: '/compressGltf',
           name: 'compressGltf',
           component: CompressGltf
+        },
+        {
+          path: '/gltf2glb',
+          name: 'gltf2glb',
+          component: Gltf2glb
+        },
+        {
+          path: '/glb2gltf',
+          name: 'glb2gltf',
+          component: Glb2gltf
         },
         {
           path: '/presentation',

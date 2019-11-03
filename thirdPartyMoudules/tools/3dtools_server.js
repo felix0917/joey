@@ -1,5 +1,10 @@
 const http = require('http')
 const fs = require('fs')
+const fsExtra = require('fs-extra')
+const gltfPipeline = require('gltf-pipeline')
+const processGltf = gltfPipeline.processGltf
+const gltfToGlb = gltfPipeline.gltfToGlb
+const glbToGltf = gltfPipeline.glbToGltf
 const server =  new http.Server()
 
 function sendfile( res, abspath, data ) {
@@ -16,13 +21,15 @@ function serverStatic(res,abspath) {
     })
 }
 
-var count = 0// 全局变量  记录已经压缩好的gltf数量
+var countCompress = 0// 全局变量  记录已经压缩好的gltf数量
+var countGltf2glb = 0
+var countGlb2gltf = 0
 var firstStartTime// 初始运行时间
 var totalTime = 0//总运行时间
 server.on( 'request', function (req, res) {
     serverStatic(res,'http://localhost:8080/')
-    if( req.method == 'POST' ){
-        var data = ""
+    if( req.method === 'POST' && req.url === '/gltfCompress'){
+        let data = ""
         req.on("data",function(chunk){
             data += chunk
         })
@@ -46,7 +53,7 @@ server.on( 'request', function (req, res) {
             function doCompress(){
                 let start=new Date()
                 let startTime=start.getTime()
-                gltfPipeline(inPutPath,
+                gltfCompress(inPutPath,
                              outPutPath,
                              dataArr[i],
                              level,
@@ -68,14 +75,78 @@ server.on( 'request', function (req, res) {
             let firstStart=new Date()
             firstStartTime=firstStart.getTime()
             //已压缩个数
-            count = 0
+            countCompress = 0
             doCompress()
             res.end("压缩中......")
         })
+    }else if(req.method === 'POST' && req.url === '/gltf2glb'){
+      let data = ""
+      req.on("data",function(chunk){
+        data += chunk
+      })
+      req.on("end",function(){
+        res.writeHead(
+          200,{'Content-Type':'text/plain'}
+        )
+        let dataArr = data.split(",")
+        let inPutPath = dataArr[0]
+        let outPutPath = dataArr[1]
+        let i = 2
+        function  doGltf2glb() {
+          let start=new Date()
+          let startTime=start.getTime()
+          let modelName = dataArr[i]
+          let index = modelName.indexOf(".")
+          gltf2glb(inPutPath, outPutPath, modelName.slice(0,index),dataArr.length-2,startTime)
+          i++
+          if(i<dataArr.length)
+            doGltf2glb()
+        }
+        console.log('\n------开始转换gltf=>glb,请耐心等待------')
+        //记录转换时间--开始时间
+        let firstStart=new Date()
+        firstStartTime=firstStart.getTime()
+        //已转换个数
+        countGlb2gltf = 0
+        doGltf2glb()
+        res.end("转换中......")
+      })
+    }else if(req.method === 'POST' && req.url === '/glb2gltf'){
+      let data = ""
+      req.on("data",function(chunk){
+        data += chunk
+      })
+      req.on("end",function(){
+        res.writeHead(
+          200,{'Content-Type':'text/plain'}
+        )
+        let dataArr = data.split(",")
+        let inPutPath = dataArr[0]
+        let outPutPath = dataArr[1]
+        let i = 2
+        function  doGlb2gltf() {
+          let start=new Date()
+          let startTime=start.getTime()
+          let modelName = dataArr[i]
+          let index = modelName.indexOf(".")
+          glb2gltf(inPutPath, outPutPath, modelName.slice(0,index),dataArr.length-2,startTime)
+          i++
+          if(i<dataArr.length)
+            doGlb2gltf()
+        }
+        console.log('\n------开始转换glb=>gltf,请耐心等待------')
+        //记录转换时间--开始时间
+        let firstStart=new Date()
+        firstStartTime=firstStart.getTime()
+        //已转换个数
+        countGlb2gltf = 0
+        doGlb2gltf()
+        res.end("转换中......")
+      })
     }
 })
 
-function gltfPipeline(inPutPath,
+function gltfCompress(inPutPath,
                       outPutPath,
                       gltfName,
                       compressionLevel,
@@ -98,9 +169,6 @@ function gltfPipeline(inPutPath,
     let genericBits = arguments[9] !=null ? parseInt(quantizeGenericBits) : 12
     let unified = arguments[10] !=null ? eval(unifiedQuantization.toLowerCase()) : false
 
-    const gltfPipeline = require('gltf-pipeline')
-    const fsExtra = require('fs-extra')
-    const processGltf = gltfPipeline.processGltf
     const gltf = fsExtra.readJsonSync(inPutPath + "\\" + gltfName)
     const options = {
         dracoOptions: {
@@ -118,17 +186,54 @@ function gltfPipeline(inPutPath,
         .then(function(results) {
             // fsExtra.writeJsonSync(outPutPath+"\\"+"compressed_"+gltfName, results.gltf)
             fsExtra.writeJsonSync(outPutPath+"\\" + gltfName, results.gltf)
-            console.log(gltfName)
-            count++
+            countCompress++
             let end=new Date()
             let endTime = end.getTime()
             console.log(gltfName + " :压缩成功" + " 用时 " + (endTime - startTime) + "ms")
-            if(count === gltfTotalNum){
+            if(countCompress === gltfTotalNum){
                 endTime = end.getTime()
                 totalTime = endTime-firstStartTime
                 console.log("------全部 gltf 压缩成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
             }
         })
+}
+
+function gltf2glb(inPutPath, outPutPath,gltfName,gltfTotalNum, startTime) {
+  const gltf = fsExtra.readJsonSync(inPutPath  + "\\" + gltfName + ".gltf")
+  gltfToGlb(gltf)
+    .then(function(results) {
+      fsExtra.writeJsonSync(outPutPath + "\\" + gltfName  + ".glb" , results.glb)
+      countGltf2glb++
+      let end=new Date()
+      let endTime = end.getTime()
+      console.log(gltfName + + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
+      if(countGltf2glb === gltfTotalNum){
+        endTime = end.getTime()
+        totalTime = endTime-firstStartTime
+        console.log("------全部 gltf 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+      }
+    });
+}
+
+function glb2gltf(inPutPath, outPutPath,glbName,glbTotalNum, startTime) {
+  const glb = fsExtra.readJsonSync(inPutPath + "\\" + glbName + ".glb" )
+  glbToGltf(glb)
+    .then(function(results) {
+      fsExtra.writeJsonSync(outPutPath + "\\" + glbName + ".gltf" , results.gltf)
+      countGlb2gltf++
+      let end=new Date()
+      let endTime = end.getTime()
+      console.log(glbName + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
+      if(countGlb2gltf === glbTotalNum){
+        endTime = end.getTime()
+        totalTime = endTime-firstStartTime
+        console.log("------全部 glb 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+      }
+    });
+}
+
+function separateTextures() {
+
 }
 server.listen(2500)
 console.log('success listen at port:2500......')

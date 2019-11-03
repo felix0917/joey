@@ -18,11 +18,25 @@ module.exports = {
           '^/api': ''
         }
       },
-      '/tools': {
-        target: 'http://localhost:2500/',
+      '/gltfCompress': {
+        target: 'http://localhost:2500/gltfCompress',
         changeOrigin: true,
         pathRewrite: {
-          '^/tools': ''
+          '^/gltfCompress': ''
+        }
+      },
+      '/gltf2glb': {
+        target: 'http://localhost:2500/gltf2glb',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/gltf2glb': ''
+        }
+      },
+      '/glb2gltf': {
+        target: 'http://localhost:2500/glb2gltf',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/glb2gltf': ''
         }
       }
     },

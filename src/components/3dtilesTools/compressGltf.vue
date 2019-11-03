@@ -99,7 +99,7 @@
 
 <script>
     import utils from '../../utils/utils'
-    //   import axios from 'axios'
+    //import axios from 'axios'
     export default {
         data() {
         return {
@@ -216,7 +216,7 @@
                                  colorBits + ',' +
                                  genericBits + ',' +
                                  unified + ','
-                for(var i = 0;i<list.length;i++){
+                for(let i = 0;i<list.length;i++){
                     if(i<list.length-1)
                         gltfInfoArrStr += list[i].name + ','
                     else
@@ -250,22 +250,19 @@
                 xhr.onreadystatechange = function () {
                     if( xhr.readyState == 4  ){//已经接收全部响应数据
                         if( (xhr.status>=200 && xhr.status<300) || xhr.status==304 ){
-                            // console.log( '-----请求并响应成功------' );
-                            console.log('-----'+xhr.responseText+'-----');
-                            //console.log( '-----请求并响应成功------' );
+                            // console.log( '-----请求并响应成功------' )
+                            console.log('-----'+xhr.responseText+'-----')
+                            //console.log( '-----请求并响应成功------' )
                         }else{
-                            console.log( "请求未成功： " + xhr.status );
+                            console.log( "请求未成功： " + xhr.status )
                         }
                     }
                 }
-                xhr.onready;
+                xhr.onready
 
                 //调用后台压缩程序
-                xhr.open('post','/tools',true)
-                xhr.send(gltfInfoArrStr);
-
-                // self.initWebSocket()
-                // self.websocketonopen("nihao")
+                xhr.open('post','/gltfCompress',true)
+                xhr.send(gltfInfoArrStr)
             },
 
             handleRemove(file, fileList) {
@@ -275,9 +272,9 @@
             },
 
             onChange(file,fileList) {
-                const isGLTF = file.name.substr(file.name.length-4)=== 'gltf'
+                const isGLTF = file.name.substr(file.name.length-4) === 'gltf'
                 if (!isGLTF) {
-                    this.$message.error('上传文件只能是gltf格式!')
+                    this.$message.error('压缩文件只能是gltf格式!')
                     fileList.pop()
                 }else{
                     this.gltfList = fileList
@@ -335,4 +332,4 @@
         outline: none;
         text-align: left;
     }
-</style>>
+</style>
