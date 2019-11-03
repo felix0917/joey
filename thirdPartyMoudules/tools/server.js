@@ -75,7 +75,7 @@ function gltfPipeline(inPutPath,outPutPath,gltfName,compressionLevel,gltfTotalNu
             let end=new Date();
             let endTime = end.getTime();
             console.log(gltfName+" :压缩成功"+" 用时 "+(endTime-startTime)+"ms");
-            if(count==gltfTotalNum){
+            if(count == gltfTotalNum){
                 endTime = end.getTime();
                 totalTime = endTime-firstStartTime;
                 console.log("------全部 gltf 压缩成功！"+"输出文件夹为："+outPutPath+"共用时："+totalTime+"ms------\n");

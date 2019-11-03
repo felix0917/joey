@@ -19,7 +19,60 @@
             </el-select>
         </el-form-item>
         
-       <el-form-item label="选取文件"> 
+        <el-form-item label="可选参数"> 
+            <el-button @click="isShowOptional" class="btn-tool">
+                <el-switch
+                v-model = 'optional'
+                active-color="#13ce66"
+                inactive-color="#ff4949"
+                @click="isShowOptional">
+            </el-switch>
+         </el-button>
+        </el-form-item>
+
+        <el-form ref="form2" :model="form2" label-width="280px" size="mini" id="optionalForm" style="display:none">
+            <el-form-item label="添加KHR_draco_mesh_compression扩展">
+                <!-- <el-input v-model="form2.meshes" class="inputStyle"></el-input> -->
+                <el-select v-model="value2" class="inputStyle">
+                    <el-option
+                        v-for="item in options2"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        >
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="位置属性量化位">
+                <el-input v-model="form2.positionBits" class="inputStyle"></el-input>
+            </el-form-item>
+            <el-form-item label="普通属性量化位">
+                <el-input v-model="form2.normalBits" class="inputStyle"></el-input>
+            </el-form-item>
+            <el-form-item label="纹理坐标属性量化位">
+                <el-input v-model="form2.texcoordBits" class="inputStyle"></el-input>
+            </el-form-item>
+            <el-form-item label="颜色属性量化位">
+                <el-input v-model="form2.colorBits" class="inputStyle"></el-input>
+            </el-form-item>
+            <el-form-item label="蒙皮及自定义属性量化位">
+                <el-input v-model="form2.genericBits" class="inputStyle"></el-input>
+            </el-form-item>
+            <el-form-item label="使用相同的量化网格量化所有图元的位置">
+                <!-- <el-input v-model="form2.unified" class="inputStyle"></el-input> -->
+                 <el-select v-model="value3" class="inputStyle">
+                    <el-option
+                        v-for="item in options3"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                        >
+                    </el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
+
+        <el-form-item label="选取文件"> 
             <el-upload 
                 multiple = "multiple" 
                 action=""
@@ -33,9 +86,9 @@
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">将文件拖到此处，或<em>点击选择</em></div>
                 <!-- <el-button slot="trigger" type="primary" size="middle">选取文件</el-button> -->
-                <div slot="tip" class="el-upload__tip">*只能上传gltf文件</div>
+                <div slot="tip" class="el-upload__tip">*只能压缩gltf文件</div>
             </el-upload>
-       </el-form-item>
+        </el-form-item>
 
         <el-form-item>
             <el-button type="primary" @click="startCompress">开始压缩</el-button>
@@ -52,7 +105,14 @@
         return {
             form: {
                 inputAbPath:'',
-                outputAbPath:''
+                outputAbPath:''     
+            },
+            form2: {
+                positionBits:14,
+                normalBits:10,
+                texcoordBits:12,
+                colorBits:8,
+                genericBits:12,
             },
             options:[
                 {
@@ -96,19 +156,66 @@
                     label:'10级'
                 }
             ],
+            options2:[
+                {
+                    value:false,
+                    label:'false'
+                },
+                {
+                    value:true,
+                    label:'true'
+                }
+            ],
+            options3:[
+                {
+                    value:false,
+                    label:'false'
+                },
+                {
+                    value:true,
+                    label:'true'
+                }
+            ],
             value:'',
+            value2:false,
+            value3:false,
+            optional: false,
             gltfList:''
         }
         },
         methods: {
+            isShowOptional() {
+                if(!this.optional)
+                    document.getElementById('optionalForm').style.display = 'none'
+                else
+                    document.getElementById('optionalForm').style.display = 'block'
+
+            },
             startCompress() {
                 let self = this
                 let list = self.gltfList
                 let level = self.value
                 let inPutVal = self.form.inputAbPath
                 let outPutVal = self.form.outputAbPath
+                let meshes = self.value2
+                let positionBits = self.form2.positionBits
+                let normalBits = self.form2.normalBits
+                let texcoordBits = self.form2.texcoordBits
+                let colorBits  = self.form2.colorBits
+                let genericBits = self.form2.genericBits
+                let unified = self.value3
+
                 let gltfInfoArrStr = ''
-                gltfInfoArrStr = inPutVal + ',' + outPutVal + ',' + level + ','
+                gltfInfoArrStr = inPutVal + ',' + 
+                                 outPutVal + ',' + 
+                                 level + ',' + 
+                                 meshes + ',' + 
+                                 positionBits + ',' + 
+                                 normalBits + ',' +
+                                 texcoordBits + ',' +
+                                 colorBits + ',' +
+                                 genericBits + ',' +
+                                 unified + ','
                 for(var i = 0;i<list.length;i++){
                     if(i<list.length-1)
                         gltfInfoArrStr += list[i].name + ','
@@ -157,8 +264,8 @@
                 xhr.open('post','/tools',true)
                 xhr.send(gltfInfoArrStr);
 
-                self.initWebSocket()
-                self.websocketonopen("nihao")
+                // self.initWebSocket()
+                // self.websocketonopen("nihao")
             },
 
             handleRemove(file, fileList) {
@@ -213,3 +320,19 @@
         }
     }
 </script>
+
+<style scoped>
+    .inputStyle {
+        width: 100px;
+    }
+
+    .btn-tool {
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        padding: 5px 10px;
+        cursor: pointer;
+        outline: none;
+        text-align: left;
+    }
+</style>>

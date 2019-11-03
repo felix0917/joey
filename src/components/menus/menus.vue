@@ -17,8 +17,10 @@
         <i class="el-icon-menu"></i>
         <span>三维工具</span>
       </template>
-      <el-menu-item index="/compressGltf">压缩GLTF</el-menu-item>
-      <el-menu-item index="/compress-glb">压缩GLB</el-menu-item>
+      <el-menu-item index="/compressGltf">压缩glTF</el-menu-item>
+      <el-menu-item index="/compress-glb">glb转glTF</el-menu-item>
+      <el-menu-item index="/compress-glb">glTF转glb</el-menu-item>
+      <el-menu-item index="/compress-glb">提取glTF纹理</el-menu-item>
     </el-submenu>
 
     <el-menu-item index="/presentation">
