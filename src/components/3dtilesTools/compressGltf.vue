@@ -240,7 +240,7 @@
                 }else if(level===''){
                     self.$message.error('请选择：压缩等级')
                     return 
-                }else if(list===''){
+                }else if(list.length===0){
                     self.$message.error('请选择：gltf文件')
                     return 
                 }

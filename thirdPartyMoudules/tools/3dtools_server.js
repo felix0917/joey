@@ -24,6 +24,7 @@ function serverStatic(res,abspath) {
 var countCompress = 0// 全局变量  记录已经压缩好的gltf数量
 var countGltf2glb = 0
 var countGlb2gltf = 0
+var countSeparateTextures = 0
 var firstStartTime// 初始运行时间
 var totalTime = 0//总运行时间
 server.on( 'request', function (req, res) {
@@ -92,7 +93,7 @@ server.on( 'request', function (req, res) {
         let inPutPath = dataArr[0]
         let outPutPath = dataArr[1]
         let i = 2
-        function  doGltf2glb() {
+        function doGltf2glb() {
           let start=new Date()
           let startTime=start.getTime()
           let modelName = dataArr[i]
@@ -124,7 +125,7 @@ server.on( 'request', function (req, res) {
         let inPutPath = dataArr[0]
         let outPutPath = dataArr[1]
         let i = 2
-        function  doGlb2gltf() {
+        function doGlb2gltf() {
           let start=new Date()
           let startTime=start.getTime()
           let modelName = dataArr[i]
@@ -143,6 +144,38 @@ server.on( 'request', function (req, res) {
         doGlb2gltf()
         res.end("转换中......")
       })
+    }else if(req.method === 'POST' && req.url === '/separateTextures'){
+      let data = ""
+      req.on("data",function(chunk){
+        data += chunk
+      })
+      req.on("end",function(){
+        res.writeHead(
+          200,{'Content-Type':'text/plain'}
+        )
+        let dataArr = data.split(",")
+        let inPutPath = dataArr[0]
+        let outPutPath = dataArr[1]
+        let i = 2
+        function doSeparateTextures() {
+          let start=new Date()
+          let startTime=start.getTime()
+          separateTextures(inPutPath, outPutPath, dataArr[i],dataArr.length-2,startTime)
+          i++
+          if(i<dataArr.length)
+            doSeparateTextures()
+        }
+        console.log('\n------开始转换处理gltf纹理,请耐心等待------')
+        //记录转换时间--开始时间
+        let firstStart=new Date()
+        firstStartTime=firstStart.getTime()
+        //已转换个数
+        countSeparateTextures = 0
+        doSeparateTextures()
+        res.end("处理中......")
+      })
+    }else{
+      //doing nothing
     }
 })
 
@@ -184,17 +217,21 @@ function gltfCompress(inPutPath,
     }
     processGltf(gltf, options)
         .then(function(results) {
-            // fsExtra.writeJsonSync(outPutPath+"\\"+"compressed_"+gltfName, results.gltf)
-            fsExtra.writeJsonSync(outPutPath+"\\" + gltfName, results.gltf)
-            countCompress++
-            let end=new Date()
-            let endTime = end.getTime()
-            console.log(gltfName + " :压缩成功" + " 用时 " + (endTime - startTime) + "ms")
-            if(countCompress === gltfTotalNum){
-                endTime = end.getTime()
-                totalTime = endTime-firstStartTime
-                console.log("------全部 gltf 压缩成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
-            }
+           try{
+             // fsExtra.writeJsonSync(outPutPath+"\\"+"compressed_"+gltfName, results.gltf)
+             fsExtra.writeJsonSync(outPutPath+"\\" + gltfName, results.gltf)
+             countCompress++
+             let end=new Date()
+             let endTime = end.getTime()
+             console.log(gltfName + " :压缩成功" + " 用时 " + (endTime - startTime) + "ms")
+             if(countCompress === gltfTotalNum){
+               endTime = end.getTime()
+               totalTime = endTime-firstStartTime
+               console.log("------全部 gltf 压缩成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+             }
+           }catch (e) {
+             console.log(e)
+           }
         })
 }
 
@@ -202,41 +239,94 @@ function gltf2glb(inPutPath, outPutPath,gltfName,gltfTotalNum, startTime) {
   const gltf = fsExtra.readJsonSync(inPutPath  + "\\" + gltfName + ".gltf")
   gltfToGlb(gltf)
     .then(function(results) {
-      fsExtra.writeJsonSync(outPutPath + "\\" + gltfName  + ".glb" , results.glb)
-      countGltf2glb++
-      let end=new Date()
-      let endTime = end.getTime()
-      console.log(gltfName + + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
-      if(countGltf2glb === gltfTotalNum){
-        endTime = end.getTime()
-        totalTime = endTime-firstStartTime
-        console.log("------全部 gltf 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+      try {
+        fsExtra.writeJsonSync(outPutPath + "\\" + gltfName  + ".glb" , results.glb)
+        countGltf2glb++
+        let end=new Date()
+        let endTime = end.getTime()
+        console.log(gltfName + + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
+        if(countGltf2glb === gltfTotalNum){
+          endTime = end.getTime()
+          totalTime = endTime-firstStartTime
+          console.log("------全部 gltf 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+        }
+      }catch (e) {
+        console.log(e)
       }
-    });
+    })
 }
 
 function glb2gltf(inPutPath, outPutPath,glbName,glbTotalNum, startTime) {
   const glb = fsExtra.readJsonSync(inPutPath + "\\" + glbName + ".glb" )
   glbToGltf(glb)
     .then(function(results) {
-      fsExtra.writeJsonSync(outPutPath + "\\" + glbName + ".gltf" , results.gltf)
-      countGlb2gltf++
-      let end=new Date()
-      let endTime = end.getTime()
-      console.log(glbName + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
-      if(countGlb2gltf === glbTotalNum){
-        endTime = end.getTime()
-        totalTime = endTime-firstStartTime
-        console.log("------全部 glb 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+      try {
+        fsExtra.writeJsonSync(outPutPath + "\\" + glbName + ".gltf" , results.gltf)
+        countGlb2gltf++
+        let end=new Date()
+        let endTime = end.getTime()
+        console.log(glbName + ".glb" + " :转换成功" + " 用时 " + (endTime - startTime) + "ms")
+        if(countGlb2gltf === glbTotalNum){
+          endTime = end.getTime()
+          totalTime = endTime-firstStartTime
+          console.log("------全部 glb 转换成功！" + "输出文件夹为：" + outPutPath+"共用时：" + totalTime + "ms------\n")
+        }
+      }catch (e) {
+        console.log(e)
       }
-    });
+    })
 }
 
-function separateTextures() {
+function separateTextures(inPutPath,outPutPath,gltfName,gltfTotalNum, startTime) {
+  const gltf = fsExtra.readJsonSync(inPutPath + "\\" + gltfName)
+  const options = {
+    separateTextures: true
+  }
+  processGltf(gltf, options)
+    .then(function(results) {
+      try {
+        let randomStr = getRandom(6)
+        let path = outPutPath + "\\" + gltfName + "_" + randomStr
+        fs.mkdir(path,err=>{
+          if(err)throw err
+        })
+        fsExtra.writeJsonSync(path + "\\" + gltfName, results.gltf)
 
+        //Save separate resources
+        const separateResources = results.separateResources;
+        for (const relativePath in separateResources) {
+          console.log(relativePath)
+          if (separateResources.hasOwnProperty(relativePath)) {
+            const resource = separateResources[relativePath];
+            fsExtra.writeFileSync(path + "\\"  +  relativePath, resource);
+          }
+        }
+
+        countSeparateTextures++
+        let end=new Date()
+        let endTime = end.getTime()
+        console.log(gltfName + " :分离纹理成功" + " 用时 " + (endTime - startTime) + "ms")
+        if(countSeparateTextures === gltfTotalNum){
+          endTime = end.getTime()
+          totalTime = endTime-firstStartTime
+          console.log("------全部 gltf 分离纹理成功！" + "输出文件夹为：" + outPutPath +"共用时：" + totalTime + "ms------\n")
+        }
+      }catch (e) {
+        console.log(e)
+      }
+    })
 }
+
+//生成n位随机小写字母
+function  getRandom(n) {
+  let res = ''
+  for (; res.length < n; res += Math.random().toString(36).substr(2).toLowerCase()) {}
+  return res.substr(0, n)
+}
+
 server.listen(2500)
 console.log('success listen at port:2500......')
+
 
 
 

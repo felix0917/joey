@@ -76,7 +76,7 @@
                 }else if(!reg.test(outPutVal)){
                     self.$message.error('请正确输入：glb文件输出绝对路径')
                     return 
-                }else if(list===''){
+                }else if(list.length===0){
                     self.$message.error('请选择：gltf文件')
                     return 
                 }

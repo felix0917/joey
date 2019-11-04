@@ -7,6 +7,7 @@ import History from '@/components/operationLog/history'
 import CompressGltf from '@/components/3dtilesTools/CompressGltf'
 import Gltf2glb from '@/components/3dtilesTools/gltf2glb'
 import Glb2gltf from '@/components/3dtilesTools/Glb2gltf'
+import SeparateTextures from '@/components/3dtilesTools/separateTextures'
 import Presentation from '@/components/presentation/presentation'
 import NotFound from '@/components/others/404'
 import Home from '@/components/home'
@@ -70,6 +71,11 @@ export default new Router({
           path: '/glb2gltf',
           name: 'glb2gltf',
           component: Glb2gltf
+        },
+        {
+          path: '/separateTextures',
+          name: 'separateTextures',
+          component: SeparateTextures
         },
         {
           path: '/presentation',

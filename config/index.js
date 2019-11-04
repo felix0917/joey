@@ -38,6 +38,13 @@ module.exports = {
         pathRewrite: {
           '^/glb2gltf': ''
         }
+      },
+      '/separateTextures': {
+        target: 'http://localhost:2500/separateTextures',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/separateTextures': ''
+        }
       }
     },
 

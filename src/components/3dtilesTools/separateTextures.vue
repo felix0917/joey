@@ -1,11 +1,11 @@
 <template>
     <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="输入">
-            <el-input v-model="form.inputAbPath" placeholder="glb输入文件夹绝对路径"></el-input>
+            <el-input v-model="form.inputAbPath" placeholder="gltf输入文件夹绝对路径"></el-input>
         </el-form-item>
 
         <el-form-item label="输出">
-            <el-input v-model="form.outputAbPath" placeholder="gltf文件输出绝对路径"></el-input>
+            <el-input v-model="form.outputAbPath" placeholder="glb文件输出绝对路径"></el-input>
         </el-form-item>
 
         <el-form-item label="选取文件"> 
@@ -16,17 +16,17 @@
                 :on-remove="handleRemove" 
                 :auto-upload="false" 
                 :on-change="onChange"
-                :glbList = "glbList"
+                :gltfList = "gltfList"
                 drag
             >
                 <i class="el-icon-upload"></i>
                 <div class="el-upload__text">将文件拖到此处，或<em>点击选择</em></div>
-                <div slot="tip" class="el-upload__tip">*只能转换glb文件</div>
+                <div slot="tip" class="el-upload__tip">*只能处理gltf文件</div>
             </el-upload>
         </el-form-item>
 
         <el-form-item>
-            <el-button type="primary" @click="startGlb2gltf">开始转换</el-button>
+            <el-button type="primary" @click="startSeparateTex">开始处理</el-button>
             <el-button @click="handleCancel">取消</el-button>
         </el-form-item>
     </el-form>
@@ -41,13 +41,13 @@
                     inputAbPath:'',
                     outputAbPath:''     
                 },
-                glbList:''
+                gltfList:''
             }
         },
         methods: {
-            startGlb2gltf(){
+            startSeparateTex(){
                 let self = this
-                let list = self.glbList
+                let list = self.gltfList
                 let inPutVal = self.form.inputAbPath
                 let outPutVal = self.form.outputAbPath
 
@@ -65,19 +65,19 @@
                  //输入正确性检测
                 let reg = utils.windowsPath//正则检测windows绝对路径
                 if(inPutVal===''){
-                    self.$message.error('请输入：glb输入文件夹绝对路径')
+                    self.$message.error('请输入：gltf输入文件夹绝对路径')
                     return
                 }else if(!reg.test(inPutVal)){
-                    self.$message.error('请正确输入：glb输入文件夹绝对路径')
+                    self.$message.error('请正确输入：gltf输入文件夹绝对路径')
                     return
                 }else if(outPutVal===''){
-                    self.$message.error('请输入：gltf文件输出绝对路径')
+                    self.$message.error('请输入：glb文件输出绝对路径')
                     return 
                 }else if(!reg.test(outPutVal)){
-                    self.$message.error('请正确输入：gltf文件输出绝对路径')
+                    self.$message.error('请正确输入：glb文件输出绝对路径')
                     return 
                 }else if(list.length===0){
-                    self.$message.error('请选择：glb文件')
+                    self.$message.error('请选择：gltf文件')
                     return 
                 }
 
@@ -97,7 +97,7 @@
                 xhr.onready
 
                 //调用后台压缩程序
-                xhr.open('post','/glb2gltf',true)
+                xhr.open('post','/separateTextures',true)
                 xhr.send(gltfInfoArrStr)
             },
 
@@ -108,19 +108,19 @@
             },
 
             onChange(file,fileList) {
-                const isGLB = file.name.substr(file.name.length-3) === 'glb'
-                if (!isGLB) {
-                    this.$message.error('转换文件只能是glb格式!')
+                const isGLTF = file.name.substr(file.name.length-4) === 'gltf'
+                if (!isGLTF) {
+                    this.$message.error('转换文件只能是gltf格式!')
                     fileList.pop()
                 }else{
-                    this.glbList = fileList
+                    this.gltfList = fileList
                 }
-                return isGLB
+                return isGLTF
             },
 
             handleCancel(){
-                while(this.glbList.length>=1){
-                    this.glbList.pop()
+                while(this.gltfList.length>=1){
+                    this.gltfList.pop()
                 }
             }
         }
