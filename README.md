@@ -1,14 +1,21 @@
 # joey
 
-> This is our place, we make the rules.
+> **joey**是一个具有图形界面的三维模型压缩、转换和处理工具，方便你快速完成批量的模型转换，目前支持以下功能：
+>
+> 1.批量压缩glTF格式的三维模型；
+>
+> 2.批量转换glTF和glb；
+>
+> 3.提取glTF纹理；
 
 ## Build Setup
 
 ``` bash
+
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:8080
+# serve with hot reload at localhost:8080 #不能登录的直接进入home页面即可
 npm run dev
 
 # build for production with minification
